@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { api } from '../api'
 const data = ref<any>(null)
-async function run() { data.value = await api('/refills/run?location_id=1', { method: 'POST' }) }
-onMounted(run)
+const loading = ref(false)
+async function run() {
+  loading.value = true
+  try { data.value = await api('/refills/run?location_id=1', { method: 'POST' }) }
+  finally { loading.value = false }
+}
 </script>
 <template>
   <h1>补货小票</h1>
   <p class="sub">gap = 容量 − 库存 − 在途 · 收据纸样式</p>
-  <button class="btn" @click="run">生成补货单</button>
+  <button class="btn" :disabled="loading" @click="run">
+    {{ loading ? '生成中…' : '生成补货单' }}
+  </button>
   <div style="margin-top:1rem" v-if="data">
     <div class="vf-receipt">
       <h2>*** VendFill 补货单 ***</h2>
